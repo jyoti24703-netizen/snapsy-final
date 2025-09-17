@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact</title>
+  <link rel="stylesheet" href="/stylesheets/feed.css">
+  <style>
+    body {
+      background-color: #ffffff; /* white background */
+      color: #000000; /* black text */
+      font-family: Arial, sans-serif;
+    }
+    .contact-container {
+      max-width: 800px;
+      margin: 80px auto;
+      background: #f9f9f9; /* light grey box */
+      padding: 40px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 32px;
+      color: #000;
+      background: none; /* remove black */
+    }
+    p {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 18px;
+      color: #000;
+      background: none; /* remove black */
+    }
+    .contact-info {
+      margin-bottom: 30px;
+      font-size: 16px;
+      line-height: 1.8;
+      background: #f9f9f9; /* light grey */
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    .contact-info p {
+      margin: 8px 0;
+      color: #000;
+      background: none; /* remove black */
+    }
+    .contact-info a {
+      color: #f30d19;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .contact-info a:hover {
+      text-decoration: underline;
+    }
+    form {
+      margin-top: 20px;
+      background: #f9f9f9; /* light grey */
+      padding: 20px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #000;
+      background: none; /* remove black */
+    }
+    input, textarea {
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      background: #ffffff; /* pure white fields */
+      color: #000;
+    }
+    textarea {
+      resize: none;
+    }
+    button {
+      background-color: #f30d19;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #c20f18;
+    }
+  </style>
+</head>
+<body>
+  <div class="contact-container">
+    <h1>Contact Us</h1>
+    <p>We’d love to hear from you! Reach out for queries, feedback, or collaborations.</p>
+    
+    <!-- Contact Info -->
+    <div class="contact-info">
+      <p>📧 Email: <a href="mailto:yourmail@example.com">yourmail@example.com</a></p>
+      <p>📞 Phone: +91-9876543210</p>
+      <p>📍 Location: New Delhi, India</p>
+    </div>
+
+    <!-- Contact Form -->
+    <form action="/contact" method="POST">
+  <label>Your Name:</label>
+  <input type="text" name="name" placeholder="Enter your name" required>
+
+  <label>Your Email:</label>
+  <input type="email" name="email" placeholder="Enter your email" required>
+
+  <label>Message:</label>
+  <textarea name="message" rows="5" placeholder="Write your message..." required></textarea>
+
+  <button type="submit">Send Message</button>
+</form>
+
+  </div>
+</body>
+</html>
+
+
+
+
+

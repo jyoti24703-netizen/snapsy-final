@@ -6,9 +6,11 @@ const postSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  image:{
-  type: String,
-
+  image: {
+    type: String,
+  },
+  video: {                     // ✅ new field for video
+    type: String,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -27,9 +29,10 @@ const postSchema = new mongoose.Schema({
 });
 
 // Create model
-const Post = mongoose.model("post", postSchema); // 🔥 changed "Post" → "post"
+const Post = mongoose.model("post", postSchema);
 
 module.exports = Post;
+
 
 
 

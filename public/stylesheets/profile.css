@@ -11,7 +11,7 @@ body {
   padding: 20px;
 }
 
-.flex{
+.flex {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -69,4 +69,29 @@ body {
 
 .button:hover {
   background-color: #7c0b11;
+}
+
+/* ✅ Video wrapper for play icon */
+.video-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.video-wrapper video {
+  display: block;
+  border-radius: 6px;
+  object-fit: cover;
+  filter: brightness(0.85); /* slight dim so play icon stands out */
+}
+
+.play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: white;
+  opacity: 0.9;
+  pointer-events: none; /* so modal still works on click */
+  text-shadow: 0px 0px 12px rgba(0,0,0,0.7);
 }
