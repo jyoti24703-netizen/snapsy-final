@@ -1,29 +1,200 @@
-<!DOCTYPE html>
+<% var project = (typeof project !== 'undefined' && project) ? project : {}; %>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projects</title>
-  <link rel="stylesheet" href="/stylesheets/feed.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Snapsy — Project</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/projects.css">
+
+  <style>
+    :root{
+      --bg:#0d1117;
+      --muted: rgba(255,255,255,0.88);
+      --card-grad: linear-gradient(135deg,#ff9a9e 0%, #ffd166 40%, #7ae7ff 100%);
+      --card-radius:18px;
+    }
+    html,body{ background:var(--bg); color:var(--muted); font-family: "Poppins", sans-serif; }
+
+    .container-wide { max-width:1200px; margin:40px auto; padding:0 18px; }
+    .nav-row { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-bottom:18px; }
+    .brand { font-weight:800; color:#d9f7ff; }
+
+    .hero {
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:28px;
+      align-items:start;
+      margin-bottom:28px;
+    }
+
+    .hero-card {
+      border-radius: var(--card-radius);
+      overflow:hidden;
+      background: var(--card-grad);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      padding:18px;
+      position:relative;
+    }
+
+    .media-wrap {
+      width:100%;
+      height: 520px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      border-radius: 12px;
+      background:#000;
+    }
+
+    /* ✅ VIDEO FINAL FIX */
+    .snapsy-video {
+      width:100%;
+      height:100%;
+      object-fit: contain;   /* ✅ THIS FIXES FACE CUT */
+      background:#000;
+      border-radius:12px;
+    }
+
+    h1.title { font-size:28px; color:#06121a; margin-bottom:6px; }
+
+    .desc {
+      color: rgba(0,0,0,0.7);
+      margin-top:8px;
+      margin-bottom:12px;
+    }
+
+    .chip {
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.92);
+      color: black;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .cta-btn {
+      display:inline-block;
+      width:100%;
+      text-align:center;
+      padding:12px;
+      border-radius:12px;
+      font-weight:700;
+      border:none;
+      cursor:pointer;
+      background: linear-gradient(90deg,#ff7a95,#ffd166,#7ae7ff);
+      color:black;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.35);
+    }
+
+    .secondary {
+      background: transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--muted);
+      padding:10px 12px;
+      border-radius:10px;
+      display:inline-block;
+      text-decoration:none;
+    }
+
+    .meta-panel {
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding:18px;
+      color: #e7f9ff;
+    }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .media-wrap { height:420px; }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="container" style="color:white; max-width:800px; margin:80px auto; text-align:center;">
-    <h1>Our Projects</h1>
-    <p style="margin-top:20px; font-size:18px;">
-      Apart from this Pinterest Clone, here are some exciting project ideas you can add in future:
-    </p>
-    <div style="margin-top:40px; text-align:left;">
-      <h3>🚀 Upcoming Ideas:</h3>
-      <ul style="font-size:16px; line-height:1.8;">
-        <li><strong>Messaging System</strong> – Chat with other users.</li>
-        <li><strong>Save Pins</strong> – Bookmark favorite posts into collections.</li>
-        <li><strong>Explore Page</strong> – Discover trending content globally.</li>
-        <li><strong>Dark Mode</strong> – Personalize your viewing experience.</li>
-      </ul>
+
+  <div class="container-wide">
+
+    <div class="nav-row">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <a href="/" class="btn btn-sm btn-outline-light">Home</a>
+        <a href="/feed" class="btn btn-sm btn-outline-light">Feed</a>
+        <a href="/profile" class="btn btn-sm btn-outline-light">Profile</a>
+        <a href="/about" class="btn btn-sm btn-outline-light">About</a>
+        <a href="/contact" class="btn btn-sm btn-outline-light">Contact</a>
+      </div>
+      <div class="brand">Snapsy</div>
     </div>
-    <p style="margin-top:40px; font-size:16px;">This page can be used to track your <strong>progress</strong> and 
-    showcase your <strong>future roadmap</strong>.</p>
+
+    <div class="hero">
+
+      <!-- ✅ LEFT: FULL AVATAR VIDEO WITH THUMBNAIL + SUBTITLE -->
+      <div class="hero-card">
+
+        <div class="media-wrap">
+
+          <video 
+            class="snapsy-video"
+            controls 
+            preload="metadata"
+            poster="/images/uploads/snapsy_project_tile.png"
+          >
+            <source src="/videos/snapsy.heygen.mp4" type="video/mp4">
+
+            <!-- ✅ SUBTITLES ENABLED -->
+            <track 
+              src="/videos/snapsy.vtt"
+              kind="subtitles"
+              srclang="en"
+              label="English"
+              default
+            >
+
+            Your browser does not support the video tag.
+          </video>
+
+        </div>
+
+        <div style="margin-top:14px; padding:10px; background: rgba(255,255,255,0.03); border-radius:10px;">
+          <h2 id="projectTitle" class="title">Snapsy — A Visual Memory Board</h2>
+
+          <p class="desc">
+            Snapsy is a full-stack memory board where moments are saved like stories.
+            Upload, name, tag and relive your favorite memories.
+            “Kuch yaadein sirf tasveer nahi hoti… woh ehsaas hoti hain.”
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ✅ RIGHT: PROJECT META -->
+      <aside class="meta-panel">
+
+        <div style="margin-bottom:14px;">
+          <div>By <strong>Jyoti</strong></div>
+          <div>Board: <strong>Snapsy Product</strong></div>
+        </div>
+
+        <a href="#" class="cta-btn">Open Full Project</a>
+        <div style="height:10px"></div>
+        <a class="secondary d-block text-center">External Link</a>
+
+        <hr>
+
+        <div>
+          <div><strong>Technology:</strong> Node.js, Express.js, MongoDB, EJS</div>
+          <div><strong>Type:</strong> Full-Stack Web App</div>
+          <div><strong>Purpose:</strong> Save & Organize Memories</div>
+        </div>
+
+      </aside>
+    </div>
+
   </div>
+
 </body>
 </html>
-

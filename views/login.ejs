@@ -3,44 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Snapsy – Login</title>
 
-  <link rel="stylesheet" href="/stylesheets/style.css">
+  <style>
+    :root {
+      --pink: #ff7a95;
+      --yellow: #ffd166;
+      --blue: #7ae7ff;
+      --cyan: #a6e3e9;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f1720;               /* PURE DARK BACKGROUND */
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      color: white;
+    }
+
+    /* Card = SAME THEME AS ABOUT.CSS */
+    .auth-card {
+      width: 370px;
+      padding: 35px;
+      border-radius: 18px;
+      text-align: center;
+      background: linear-gradient(135deg,
+        var(--pink),
+        var(--yellow),
+        var(--blue),
+        var(--cyan)
+      );
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    /* Snapsy logo in BLACK */
+    .snapsy-logo {
+      font-size: 46px;
+      font-weight: 900;
+      color: #000;                      /* BLACK LOGO */
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+      opacity: 0.9;
+    }
+
+    /* Inputs */
+    .detail {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+      background: rgba(255,255,255,0.9);
+      color: #000;
+    }
+
+    /* Button using your gradient */
+    .btn-snapsy {
+      width: 100%;
+      padding: 12px;
+      margin-top: 18px;
+      font-size: 16px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--pink), var(--blue));
+      color: #000;
+    }
+
+    .btn-snapsy:hover {
+      opacity: 0.85;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #111;
+    }
+
+    footer a {
+      color: #000;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* Back Button */
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .error {
+      background: rgba(0,0,0,0.4);
+      padding: 8px;
+      border-radius: 8px;
+      color: white;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 
 <body>
-  <!-- Added a wrapper for flex centering -->
-  <div class="wrapper">
-    <div class="container">
-      <div class="content">
-        <!--pinterest logo-->
-        <img src="https://i.pinimg.com/originals/d3/d1/75/d3d175e560ae133f1ed5cd4ec173751a.png" alt="pin logo" class="img1" />
-        <p class="header">login account to see more</p>
 
-        <% if (typeof error !== 'undefined' && error.length > 0) { %>
-  <p class="error"><%= error %></p>
-<% } %>
+  <!-- 🔙 Back Button -->
+  <a href="/" class="back-btn">← Back</a>
 
+  <div class="auth-card">
+    
+    <!-- BLACK SNAPSY LOGO -->
+    <div class="snapsy-logo">Snapsy</div>
 
-        <form action="/login" method="post">
-          <input type="text"  name="username"  placeholder="username" class="detail" /><br />
-          <input type="password" name="password" placeholder="Password" class="detail" /><br />
-          
-          <input type="submit" class="btn int" value="Login My Account">
-        </form>
+    <p style="font-size:15px; margin-bottom: 12px; color:#000;">
+      Login to explore beautiful snaps ✨
+    </p>
 
-        <a href="/forgot">Forgot your password?</a>
-        <footer>
-          <p>
-            By continuing, you agree to Pinterest's
-            <b>Terms of Service, Privacy policy.</b>
-          </p>
-          <hr />
-          <a href="/">Not on Pinterest yet? Sign up</a>
-        </footer>
-      </div>
-    </div>
+    <% if (typeof error !== 'undefined' && error.length > 0) { %>
+      <p class="error"><%= error %></p>
+    <% } %>
+
+    <form action="/login" method="post">
+      <input type="text" name="username" placeholder="Username" class="detail" />
+      <input type="password" name="password" placeholder="Password" class="detail" />
+      <button type="submit" class="btn-snapsy">Login</button>
+    </form>
+
+    <a href="/forgot" style="font-size:13px; color:#000;">Forgot your password?</a>
+
+    <footer>
+      <p>
+        By continuing, you agree to Snapsy’s
+        <b>Terms of Service</b> & <b>Privacy Policy</b>.
+      </p>
+      <hr />
+      <a href="/">Not on Snapsy yet? Sign Up</a>
+    </footer>
+
   </div>
-  
+
 </body>
 </html>

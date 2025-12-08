@@ -1,132 +1,179 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact</title>
-  <link rel="stylesheet" href="/stylesheets/feed.css">
-  <style>
-    body {
-      background-color: #ffffff; /* white background */
-      color: #000000; /* black text */
-      font-family: Arial, sans-serif;
-    }
-    .contact-container {
-      max-width: 800px;
-      margin: 80px auto;
-      background: #f9f9f9; /* light grey box */
-      padding: 40px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 32px;
-      color: #000;
-      background: none; /* remove black */
-    }
-    p {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 18px;
-      color: #000;
-      background: none; /* remove black */
-    }
-    .contact-info {
-      margin-bottom: 30px;
-      font-size: 16px;
-      line-height: 1.8;
-      background: #f9f9f9; /* light grey */
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid #eee;
-    }
-    .contact-info p {
-      margin: 8px 0;
-      color: #000;
-      background: none; /* remove black */
-    }
-    .contact-info a {
-      color: #f30d19;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    .contact-info a:hover {
-      text-decoration: underline;
-    }
-    form {
-      margin-top: 20px;
-      background: #f9f9f9; /* light grey */
-      padding: 20px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #000;
-      background: none; /* remove black */
-    }
-    input, textarea {
-      width: 100%;
-      margin-bottom: 20px;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-      background: #ffffff; /* pure white fields */
-      color: #000;
-    }
-    textarea {
-      resize: none;
-    }
-    button {
-      background-color: #f30d19;
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #c20f18;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact — Jyoti</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/contact.css" />
 </head>
 <body>
-  <div class="contact-container">
-    <h1>Contact Us</h1>
-    <p>We’d love to hear from you! Reach out for queries, feedback, or collaborations.</p>
-    
-    <!-- Contact Info -->
-    <div class="contact-info">
-      <p>📧 Email: <a href="mailto:yourmail@example.com">yourmail@example.com</a></p>
-      <p>📞 Phone: +91-9876543210</p>
-      <p>📍 Location: New Delhi, India</p>
-    </div>
 
-    <!-- Contact Form -->
-    <form action="/contact" method="POST">
-  <label>Your Name:</label>
-  <input type="text" name="name" placeholder="Enter your name" required>
+  <!-- ✅ Back to Profile Floating Button (RESTORED) -->
+  <a href="/profile" class="back-profile-btn" title="Back to Profile">←</a>
 
-  <label>Your Email:</label>
-  <input type="email" name="email" placeholder="Enter your email" required>
+  <main class="contact-page">
 
-  <label>Message:</label>
-  <textarea name="message" rows="5" placeholder="Write your message..." required></textarea>
+    <!-- HERO / TOP CARD -->
+    <section class="contact-hero">
+      <div class="hero-card">
+        <div class="left">
+          <div class="avatar-block">
+            <div class="avatar">J<span class="online"></span></div>
+            <div class="who">
+              <h1>Hi — I'm Jyoti</h1>
+              <p class="tagline">Full-stack dev • Cloud enthusiast • Building joyful experiences — this is my creative playground where code meets design.</p>
+              <p class="micro">I love collaborating on web and cloud projects, mentoring new developers and designing delightful UIs. Tell me about your idea — I’m curious!</p>
+            </div>
+          </div>
 
-  <button type="submit">Send Message</button>
-</form>
+          <div class="contact-cards">
+            <div class="info-card">
+              <div class="info-row">📧 <strong>Email:</strong> <a href="mailto:jyoti24703@gmail.com">jyoti24703@gmail.com</a></div>
+              <div class="info-row">📞 <strong>Phone:</strong> <a href="tel:+919876543210">+91-9876543210</a></div>
+              <div class="info-row">📍 <strong>Location:</strong> New Delhi, India</div>
+            </div>
 
-  </div>
+            <div class="social-card">
+              <p class="small">Find me on</p>
+              <div class="socials">
+                <a href="https://github.com/jyoti24703-netizen" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/jyoti-yadav-043b56320/" target="_blank">LinkedIn</a>
+              </div>
+            </div>
+
+            <!-- Stay in the loop -->
+            <div class="newsletter-card">
+              <p class="small">Stay in the loop</p>
+              <div class="stay-loop">
+                <input id="stayEmail" type="email" placeholder="Your email" />
+                <button id="stayBtn" class="subscribe" disabled>
+                  <span class="subscribe-text">Subscribe</span>
+                </button>
+              </div>
+              <p class="muted" id="stayMsg"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="mosaic">
+            <div class="m tile1">Design</div>
+            <div class="m tile2">Cloud</div>
+            <div class="m tile3">Node.js</div>
+            <div class="m tile4">Community</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM + MAP -->
+    <section class="contact-grid">
+      <div class="form-column">
+        <div class="form-card">
+          <h2>Let's talk — send a message</h2>
+          <p class="muted">Have a question, a project idea or want to collaborate? Fill the form — I’ll respond within 48hrs.</p>
+
+          <form id="contactForm" action="/contact" method="post">
+            <label>Your name</label>
+            <input name="name" type="text" required />
+
+            <label>Your email</label>
+            <input name="email" type="email" required />
+
+            <label>Message</label>
+            <textarea name="message" rows="6" required></textarea>
+
+            <div class="form-row">
+              <button type="submit" class="btn primary">Send message</button>
+              <button type="button" id="demoBtn" class="btn ghost">Quick demo (fill)</button>
+            </div>
+
+            <p id="formStatus" class="muted"></p>
+          </form>
+        </div>
+      </div>
+
+      <div class="map-column">
+        <div class="map-card">
+          <h3>Where I work</h3>
+          <p class="muted">Hybrid — remote friendly. Here’s a visual location.</p>
+
+          <!-- ✅ MAP RESTORED -->
+          <div class="map-wrap">
+            <iframe
+              src="https://www.google.com/maps?q=New+Delhi&output=embed"
+              width="100%" height="260" style="border:0;"
+              loading="lazy"></iframe>
+          </div>
+
+          <div class="faq">
+            <h4>Quick FAQs</h4>
+            <details>
+              <summary>Do you accept freelance work?</summary>
+              <p>Yes — I carefully choose short-term and long-term collaborations.</p>
+            </details>
+            <details>
+              <summary>What is your typical response time?</summary>
+              <p>I usually reply within 24–48 hours.</p>
+            </details>
+            <details>
+              <summary>Do you mentor students?</summary>
+              <p>Yes — I enjoy mentoring junior devs.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="contact-footer">
+      <p>Made with ❤️ by Jyoti — © <span id="year"></span></p>
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    document.getElementById('demoBtn').onclick = () => {
+      document.querySelector('input[name="name"]').value = 'Jyoti Demo';
+      document.querySelector('input[name="email"]').value = 'demo@example.com';
+      document.querySelector('textarea').value = 'Hi! This is a demo message.';
+    };
+
+    const btn = document.getElementById('stayBtn');
+    const input = document.getElementById('stayEmail');
+    const msg = document.getElementById('stayMsg');
+
+    input.addEventListener('input', () => {
+      if (/\S+@\S+\.\S+/.test(input.value)) {
+        btn.disabled = false;
+        btn.classList.add('enabled');
+      } else {
+        btn.disabled = true;
+        btn.classList.remove('enabled');
+      }
+    });
+
+    btn.onclick = () => {
+      msg.textContent = "✅ Subscribed successfully!";
+      msg.style.color = "#ffd166";
+      input.value = "";
+      btn.disabled = true;
+      btn.classList.remove('enabled');
+    };
+  </script>
+
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 

@@ -1,176 +1,263 @@
-var express = require('express'); 
+var express = require('express');
 var router = express.Router();
+
+require("dotenv").config();  
+const nodemailer = require("nodemailer");
 
 const fs = require("fs");
 const path = require("path");
 
 const userModel = require("./users");
 const postModel = require("./posts");
-const commentModel = require("./comments"); // ✅
-const Contact = require("./contact");       // 🆕 contact model
+const commentModel = require("./comments");
+const Contact = require("./contact");
 
 const passport = require('passport');
 const upload = require("./multer");
 const localStrategy = require("passport-local");
 passport.use(new localStrategy(userModel.authenticate()));
 
-// ---------- Routes ----------
-router.get('/', function(req, res, next) {
+// ------------------ HOME ------------------
+router.get('/', function(req, res) {
   res.render('index');
 });
 
-router.get('/login', function (req, res, next) {
+// ------------------ LOGIN ------------------
+router.get('/login', function (req, res) {
   res.render('login', { error: req.flash('error') });
 });
 
-router.get('/feed', function(req, res, next) {
-  res.render('feed');
+// ------------------ FEED ------------------
+router.get('/feed', async (req, res) => {
+  try {
+    const posts = await postModel.find({})
+      .populate('user', 'username fullname dp')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.render('feed', { posts, user: req.user });
+  } catch (err) {
+    console.error("Feed error:", err);
+    res.status(500).send("Error loading feed");
+  }
 });
 
-// ✅ Upload route (image OR video)
-router.post('/upload', isLoggedIn, upload.single("file"), async function(req, res, next) {
-  if (!req.file) return res.status(404).send("no files were given");
+// ------------------ UPLOAD ------------------
+router.post('/upload', isLoggedIn, upload.single("file"), async function(req, res) {
+  try {
+    if (!req.file) return res.status(400).send("No file uploaded");
 
-  const user = await userModel.findOne({ username: req.session.passport.user });
-  let postData = { imageText: req.body.filecaption, user: user._id };
+    const user = await userModel.findOne({ username: req.session.passport.user });
+    if (!user) return res.status(404).send("User not found");
 
-  if (req.file.mimetype.startsWith("image")) postData.image = req.file.filename;
-  else if (req.file.mimetype.startsWith("video")) postData.video = req.file.filename;
+    let postData = {
+      imageText: req.body.filecaption || "",
+      imageName: req.body.imagename || "",
+      user: user._id,
+      memory: ""
+    };
 
-  const post = await postModel.create(postData);
-  user.posts.push(post._id);
-  await user.save();
-  res.redirect("/profile");
+    if (req.file.mimetype.startsWith("image")) postData.image = req.file.filename;
+    else if (req.file.mimetype.startsWith("video")) postData.video = req.file.filename;
+
+    const post = await postModel.create(postData);
+    user.posts.push(post._id);
+    await user.save();
+
+    res.redirect("/profile");
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).send("Error uploading file");
+  }
 });
 
-router.get('/profile', isLoggedIn, async function(req, res, next) {
-  const user = await userModel.findOne({ username: req.session.passport.user }).populate("posts");
-  res.render("profile", { user });
-});
-
-router.post("/register", function(req, res) {
-  const { username, email, fullname } = req.body;
-  const userData = new userModel({ username, email, fullname });
-
-  userModel.register(userData, req.body.password)
-    .then(function() {
-      passport.authenticate("local")(req, res, function() {
-        res.redirect("/profile");
+// ------------------ PROFILE ------------------
+router.get('/profile', isLoggedIn, async function(req, res) {
+  try {
+    const user = await userModel
+      .findOne({ username: req.session.passport.user })
+      .populate({
+        path: "posts",
+        options: { sort: { createdAt: -1 } }
       });
-    });
+
+    if (!user) return res.redirect('/login');
+    res.render("profile", { user });
+  } catch (err) {
+    console.error("Profile error:", err);
+    res.status(500).send("Error loading profile");
+  }
 });
 
+// ------------------ REGISTER ------------------
+router.post("/register", async function(req, res) {
+  try {
+    const { username, email, fullname } = req.body;
+    const userData = new userModel({ username, email, fullname });
+
+    await userModel.register(userData, req.body.password);
+    passport.authenticate("local")(req, res, function() {
+      res.redirect("/profile");
+    });
+  } catch (err) {
+    console.error("Register error:", err);
+    res.status(500).send("Error registering user");
+  }
+});
+
+// ------------------ LOGIN POST ------------------
 router.post("/login", passport.authenticate("local", {
   successRedirect: "/profile",
   failureRedirect: "/login",
   failureFlash: true
-}), function(req, res) { });
+}));
 
-router.get("/logout", function(req, res) {
+// ------------------ LOGOUT ------------------
+router.get("/logout", function(req, res, next) {
   req.logout(function(err) {
-    if (err) { return next(err); }
+    if (err) return next(err);
     res.redirect('/');
   });
 });
 
-// Delete route
-router.post("/delete/:id", isLoggedIn, async function(req, res, next) {
+// ------------------ DELETE ------------------
+router.post("/delete/:id", isLoggedIn, async function(req, res) {
   try {
     const postId = req.params.id;
-    await postModel.findByIdAndDelete(postId);
-    await userModel.updateOne({ username: req.session.passport.user }, { $pull: { posts: postId } });
-    res.redirect("/profile");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error deleting post");
-  }
-});
 
-// Comment route
-router.post('/comment/:id', isLoggedIn, async function(req, res, next) {
-  try {
-    const postId = req.params.id;
-    const user = await userModel.findOne({ username: req.session.passport.user });
-    const comment = await commentModel.create({ post: postId, user: user._id, text: req.body.text });
+    const post = await postModel.findByIdAndDelete(postId);
 
-    res.json({ success: true, comment: { text: comment.text, user: user.username, createdAt: comment.createdAt } });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Error adding comment" });
-  }
-});
-
-// Edit page
-router.get("/edit/:id", isLoggedIn, async function(req, res) {
-  const post = await postModel.findById(req.params.id);
-  res.render("edit", { post });
-});
-
-// Update route
-router.post("/update/:id", isLoggedIn, upload.single("file"), async function(req, res) {
-  try {
-    const post = await postModel.findById(req.params.id);
-    post.imageText = req.body.filecaption;
-
-    if (req.file) {
-      if (post.image || post.video) {
-        const oldPath = path.join(__dirname, "public", "images", "uploads", post.image || post.video);
+    if (post) {
+      const oldMedia = post.image || post.video;
+      if (oldMedia) {
+        const oldPath = path.join(__dirname, "../public/images/uploads", oldMedia);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-
-      if (req.file.mimetype.startsWith("image")) { post.image = req.file.filename; post.video = undefined; }
-      else if (req.file.mimetype.startsWith("video")) { post.video = req.file.filename; post.image = undefined; }
     }
 
-    await post.save();
-    res.redirect("/profile");
+    await userModel.updateOne(
+      { username: req.session.passport.user },
+      { $pull: { posts: postId } }
+    );
+
+    res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error updating post");
+    console.error("Delete error:", err);
+    res.status(500).json({ success: false });
   }
 });
 
-// About, Contact, Projects routes
+// ------------------ SAVE MEMORY ------------------
+router.post('/memory/:id', isLoggedIn, async function(req, res) {
+  try {
+    const postId = req.params.id;
+    const { memory } = req.body;
+
+    await postModel.findByIdAndUpdate(postId, { memory });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Memory save error:", err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// ------------------ EDIT ------------------
+router.post("/edit/:id", isLoggedIn, async function(req, res) {
+  try {
+    const { caption, memory } = req.body;
+
+    await postModel.findByIdAndUpdate(req.params.id, {
+      imageText: caption,
+      memory: memory
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Edit error:", err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// ------------------ UPDATE DP ------------------
+router.post("/update-dp", isLoggedIn, upload.single("dp"), async (req, res) => {
+  try {
+    const user = await userModel.findOne({ username: req.session.passport.user });
+    if (req.file) user.dp = req.file.filename;
+    await user.save();
+    res.redirect("/profile");
+  } catch (err) {
+    res.status(500).send("Error updating profile picture");
+  }
+});
+
+// ------------------ UPDATE BIO ------------------
+router.post("/update-bio", isLoggedIn, async (req, res) => {
+  try {
+    const user = await userModel.findOne({ username: req.session.passport.user });
+    user.bio = req.body.bio || "";
+    await user.save();
+    res.redirect("/profile");
+  } catch (err) {
+    res.status(500).send("Error updating bio");
+  }
+});
+
+// ------------------ PROJECTS ------------------
+router.get("/projects", async (req, res) => {
+  const latest = await postModel.findOne({}).sort({ createdAt: -1 }).lean();
+  res.render("projects", { project: latest || {} });
+});
+
+// ------------------ ABOUT & CONTACT ------------------
 router.get("/about", (req, res) => res.render("about"));
 router.get("/contact", (req, res) => res.render("contact"));
-router.get("/projects", (req, res) => res.render("projects"));
 
-// ---------- Contact form submission (MongoDB + Gmail) ----------
+// ====================================================
+// ✅ ✅ ✅ CONTACT FORM → SAVE + EMAIL + REDIRECT (FINAL)
+// ====================================================
 router.post("/contact", async (req, res) => {
-  const { name, email, message } = req.body;
-  const nodemailer = require("nodemailer");
-
   try {
-    // Save message to MongoDB
+    const { name, email, message } = req.body;
+
+    // ✅ Save to MongoDB
     await Contact.create({ name, email, message });
 
-    // Send email
-    let transporter = nodemailer.createTransport({
-      service: "gmail",
+    // ✅ Gmail Transporter (FIXED TO 587)
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
-        user: "jyoti24703@gmail.com",       // <-- Replace with your Gmail
-        pass: "sqxdocrrlqdocnom"
-         // <-- Replace with Gmail App Password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
-    await transporter.sendMail({
-      from: email,                         // sender is user
-      to: "yourgmail@gmail.com",           // receive in your Gmail
-      subject: "New Contact Message",
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
-    });
+    const mailOptions = {
+      from: `"Contact Form" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      replyTo: email,
+      subject: `📩 New Contact Message from ${name}`,
+      html: `
+        <h3>New Contact Form Message</h3>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `
+    };
 
-    // Thank-you page
+    await transporter.sendMail(mailOptions);
+
     res.render("contact-success", { name });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error processing your message");
+    console.error("Contact error:", err);
+    res.status(500).send("Error submitting contact form");
   }
 });
 
-// ---------- Middleware ----------
+// ------------------ AUTH MIDDLEWARE ------------------
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/login");

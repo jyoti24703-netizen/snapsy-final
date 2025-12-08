@@ -1,29 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About</title>
-  <link rel="stylesheet" href="/stylesheets/feed.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About — Jyoti</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- page CSS -->
+  <link rel="stylesheet" href="/stylesheets/about.css" />
 </head>
 <body>
-  <div class="container" style="color:white; max-width:800px; margin:80px auto; text-align:center;">
-    <h1>About Our Pinterest Clone</h1>
-    <p style="margin-top:20px; font-size:18px; line-height:1.6;">
-      This project is built as a social platform where users can upload and share their 
-      favorite photos and videos. Inspired by Pinterest, it allows you to 
-      <strong>express creativity</strong>, <strong>save inspirations</strong>, and 
-      <strong>explore ideas</strong> shared by others.
-    </p>
-    <h3 style="margin-top:40px;">✨ Features:</h3>
-    <ul style="list-style:none; padding:0; font-size:16px; line-height:1.8;">
-      <li>📌 Upload photos and videos with captions</li>
-      <li>❤️ Like, comment, and engage with posts</li>
-      <li>🖼️ Clean and simple profile layout</li>
-      <li>🔒 Secure login & registration system</li>
-    </ul>
-    <p style="margin-top:40px;">We aim to make this platform a place where <strong>ideas meet creativity</strong>.</p>
-  </div>
+
+  <!-- ✅ BACK TO PROFILE BUTTON (FIXED) -->
+  <a href="/profile" style="
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 9999;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg,#ff7a95,#ffd166,#7ae7ff);
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  ">
+    ← Profile
+  </a>
+
+  <main class="about-page">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="hero-left">
+          <div id="avatar" class="avatar" title="Click me to animate">J
+            <span class="online-dot" aria-hidden="true"></span>
+          </div>
+
+          <h1>Hi — I'm Jyoti</h1>
+          <p class="lead">
+            This is a creative Pinterest-style playground where people can share images, save ideas and explore inspiration.
+          </p>
+
+          <div class="meta pills" id="pills">
+            <button class="pill" data-key="explore">Explore Pins</button>
+            <button class="pill" data-key="upload">Upload Media</button>
+            <button class="pill" data-key="secure">Secure Auth</button>
+          </div>
+
+          <div class="cta-row">
+            <a class="btn primary" href="/projects">Explore Pins</a>
+            <a class="btn ghost" href="/projects">Roadmap</a>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="grid-preview">
+            <div class="tile tile-1">
+              <div class="tile-text">Create • Share • Inspire</div>
+            </div>
+            <div class="tile tile-2">
+              <div class="tile-text">Save what moves you</div>
+            </div>
+            <div class="tile tile-3">
+              <div class="tile-text">Build a creative profile</div>
+            </div>
+            <div class="tile tile-4">
+              <div class="tile-text">Ideas meet execution</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <h2>What you can do here</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>📌 Upload Pins</h3>
+          <p>Share photos & videos with captions, tags and collections.</p>
+        </article>
+        <article class="card">
+          <h3>❤️ Engage</h3>
+          <p>Like, comment and follow creators to build your inspiration board.</p>
+        </article>
+        <article class="card">
+          <h3>🔒 Secure Login</h3>
+          <p>Safe registration and auth using Passport/Mongo — your data is private.</p>
+        </article>
+        <article class="card">
+          <h3>🌙 Dark Mode Ready</h3>
+          <p>Design has clean contrast and adapts well to dark themes.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Made with ❤️ • Built by Jyoti</p>
+    </footer>
+  </main>
 </body>
 </html>
+
 

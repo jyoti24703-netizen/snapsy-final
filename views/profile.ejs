@@ -1,165 +1,255 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Profile</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/stylesheets/profile.css">
-  </head>
-  <body>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Snapsy Profile</title>
 
-    <!-- 🔹 Top bar with Feed button -->
-    <div class="container mt-3 d-flex justify-content-end">
-      <a href="/feed" class="btn btn-danger btn-sm">Feed</a>
-    </div>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <div class="containerpers">
-      <div class="cardpers text-center">
-        <div class="profile-picture mb-3">
-          <img src="https://images.unsplash.com/photo-1756811954479-82f0c0c27c53?w=600" 
-               alt="Profile Picture" class="rounded-circle" width="120">
-        </div>
-        <h2 class="name"><%= user.fullname %></h2>
-        <h3 class="username">@<%= user.username %></h3>
+<style>
+body{background:#0d1117;color:white;font-family:Poppins,sans-serif}
+.profile-card{max-width:900px;margin:40px auto;padding:35px;border-radius:25px;
+background:linear-gradient(135deg,#ff9a9e,#ffd166,#7ae7ff);text-align:center}
+.dp-container{width:130px;height:130px;border-radius:50%;overflow:hidden;border:4px solid white;cursor:pointer}
+.dp-container img{width:100%;height:100%;object-fit:cover}
+.btn-theme{background:linear-gradient(135deg,#ff9a9e,#7ae7ff);border:none;color:black;border-radius:25px;padding:8px 22px;font-weight:700}
+.btn-logout{background:black;border:2px solid #ff9a9e;border-radius:25px;color:white;padding:8px 22px}
+.theme-input{background:black;border:2px solid #ff9a9e;color:white;border-radius:20px;padding:6px 14px}
+.theme-input::file-selector-button{background:#111827;color:white;border:none;padding:6px 12px;border-radius:12px}
 
-        <!-- ✅ Replaced placeholder text -->
-        <p class="tagline">Sharing moments, one post at a time.</p>
-        <p class="description">Welcome to your profile! Upload your thoughts, photos, and videos to express yourself.</p>
-        
-        <!-- 🔹 Logout button red -->
-        <a href="/logout" class="btn btn-danger mb-3">Logout</a>
+.snaps-container{max-width:1200px;margin:30px auto;padding:15px}
+.snaps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.snap-card{background:#06080d;border-radius:12px;overflow:hidden;padding-bottom:10px}
+.snap-thumb-wrap{position:relative;height:220px;cursor:pointer}
+.snap-thumb-wrap img,.snap-thumb-wrap video{width:100%;height:100%;object-fit:cover}
+.play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;color:white}
 
-        <!-- ✅ Upload form in one line -->
-        <form action="/upload" method="post" enctype="multipart/form-data" class="d-flex gap-2 mt-3 justify-content-center">
-          <input type="text" name="filecaption" placeholder="Some caption"
-                 class="form-control" style="max-width: 200px;">
-          <input type="file" name="file" class="form-control" style="max-width: 250px;">
-          <button type="submit" class="btn btn-danger">Submit</button>
-        </form>
-      </div>
-    </div>
+.snap-info{padding:10px;color:white}
+.snap-title{font-weight:700;font-size:16px}
+.placeholder-line{font-size:13px;color:#ffd166;font-style:italic;margin-top:4px}
+.comment-box{width:100%;margin-top:8px;border-radius:10px;padding:6px}
+.snap-actions{display:flex;gap:10px;margin-top:8px}
 
-    <!-- ✅ Posts -->
-    <div class="container mt-4">
-      <div class="row g-3">
-        <% user.posts.forEach(function(post){ %>
-          <div class="col-md-4">
-            <div class="card">
-              <% if (post.image) { %>
-                <img src="/images/uploads/<%= post.image %>" 
-                     class="card-img-top open-media"
-                     data-bs-toggle="modal" 
-                     data-bs-target="#mediaModal" 
-                     data-type="image" 
-                     data-src="/images/uploads/<%= post.image %>">
-              <% } else if (post.video) { %>
-                <!-- ✅ Video with play icon -->
-                <div class="video-wrapper position-relative">
-                  <video width="100%" class="open-media" 
-                         data-bs-toggle="modal" 
-                         data-bs-target="#mediaModal" 
-                         data-type="video" 
-                         data-src="/images/uploads/<%= post.video %>" 
-                         preload="metadata" 
-                         muted>
-                    <source src="/images/uploads/<%= post.video %>#t=0.1" type="video/mp4">
-                  </video>
-                  <span class="play-icon">&#9658;</span>
-                </div>
-              <% } %>
-              <div class="card-body">
-                <h5 class="card-title"><%= post.imageText %></h5>
+.btn-delete{background:#ff9a9e;border:none;color:black;border-radius:10px;padding:7px 14px}
+.btn-edit{background:#7ae7ff;border:none;color:black;border-radius:10px;padding:7px 14px}
 
-                <!-- Delete + Edit -->
-                <form action="/delete/<%= post._id %>" method="post" class="d-inline">
-                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                </form>
-                <a href="/edit/<%= post._id %>" class="btn btn-primary btn-sm">Edit</a>
+.search-wrap{max-width:500px;margin:20px auto;position:relative}
+.search-wrap input{padding-left:40px;border-radius:25px}
+.search-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#ff9a9e}
 
-                <!-- Comment input -->
-                <input type="text" class="form-control mt-2 comment-input" 
-                       data-postid="<%= post._id %>" placeholder="Write a comment...">
+.lightbox{position:fixed;inset:0;display:none;background:rgba(0,0,0,.9);z-index:9999}
+.lightbox.open{display:flex;align-items:center;justify-content:center}
 
-                <!-- Comments list -->
-                <ul class="list-group list-group-flush mt-2 comments-list" id="comments-<%= post._id %>">
-                </ul>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    </div>
+.lightbox-panel{width:95%;max-width:1100px;height:90vh;
+background:linear-gradient(135deg,#ff9a9e,#ffd166,#7ae7ff);border-radius:18px;display:flex}
 
-    <!-- ✅ Modal for opening posts -->
-    <div class="modal fade" id="mediaModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark">
-          <div class="modal-body text-center">
-            <!-- content gets injected by JS -->
-          </div>
-        </div>
-      </div>
-    </div>
+.light-left{width:35%;padding:20px;color:black}
+.light-right{width:65%;display:flex;align-items:center;justify-content:center;position:relative;background:black}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // ✅ Modal handler for opening posts
-      const modal = document.getElementById('mediaModal');
-      const modalBody = modal.querySelector('.modal-body');
+.viewer-media{max-width:100%;max-height:90%;border-radius:10px}
+.controls{position:absolute;top:10px;right:10px;display:flex;gap:10px;z-index:10}
+.controls button{background:black;color:white;border-radius:8px;padding:6px 12px;border:2px solid #ff9a9e}
+</style>
+</head>
 
-      document.querySelectorAll('.open-media').forEach(el => {
-        el.addEventListener('click', function() {
-          const type = this.getAttribute('data-type');
-          const src = this.getAttribute('data-src');
+<body>
 
-          if(type === 'image') {
-            modalBody.innerHTML = '<img src="'+src+'" class="img-fluid rounded">';
-          } else if(type === 'video') {
-            modalBody.innerHTML = `
-              <video controls autoplay muted playsinline style="width:100%">
-                <source src="${src}" type="video/mp4">
-                Your browser does not support the video tag.
-              </video>
-            `;
-          }
-        });
-      });
+<div class="container mt-3 d-flex justify-content-between">
+<a href="/feed" class="btn btn-sm btn-outline-light">← Feed</a>
+<div>
+<a href="/about" class="btn btn-sm btn-outline-light me-2">About</a>
+<a href="/projects" class="btn btn-sm btn-outline-light">Projects</a>
+</div>
+</div>
 
-      modal.addEventListener('hidden.bs.modal', () => {
-        modalBody.innerHTML = '';
-      });
+<div class="profile-card">
+<form action="/update-dp" method="POST" enctype="multipart/form-data">
+<!-- ✅ FIXED LINE 1 -->
+<div class="dp-container mx-auto mb-3" onclick="document.getElementById('dp').click()">
+<img src="<%= user.dp ? '/images/uploads/'+user.dp : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' %>">
+<input hidden type="file" name="dp" id="dp" onchange="this.form.submit()">
+</div>
+</form>
 
-      // ✅ Comment AJAX
-      document.querySelectorAll('.comment-input').forEach(input => {
-        input.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            const postId = this.getAttribute('data-postid');
-            const text = this.value.trim();
-            if (!text) return;
+<h2><%= user.fullname %></h2>
+<h5>@<%= user.username %></h5>
+<p><%= user.bio || "Add a bio…" %></p>
 
-            fetch('/comment/' + postId, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                const list = document.getElementById('comments-' + postId);
-                const li = document.createElement('li');
-                li.className = "list-group-item";
-                li.textContent = data.comment.user + ": " + data.comment.text;
-                list.prepend(li);
-                this.value = "";
-              } else {
-                alert("Error adding comment");
-              }
-            });
-          }
-        });
-      });
-    </script>
-  </body>
+<form action="/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 justify-content-center mt-3">
+<input name="filecaption" class="theme-input" placeholder="Caption">
+<input type="file" name="file" class="theme-input">
+<button class="btn-theme">Upload</button>
+</form>
+
+<div class="mt-3 d-flex justify-content-center gap-3">
+<button onclick="editProfile()" class="btn-theme">Edit Profile</button>
+<a href="/logout" class="btn-logout">Logout</a>
+</div>
+</div>
+
+<div class="search-wrap">
+<span>🔍</span>
+<input id="searchInput" class="form-control" placeholder="Search your memories…">
+</div>
+
+<div class="snaps-container">
+<h3 class="text-center mb-3">Your Snaps</h3>
+
+<div class="snaps-grid">
+<% user.posts.forEach(post=>{ %>
+
+<div class="snap-card" data-id="<%= post._id %>" data-caption="<%= post.imageText.toLowerCase() %>" data-memory="<%= post.memory || '' %>">
+
+<!-- ✅ FIXED LINE 2 -->
+<div class="snap-thumb-wrap" onclick="openSnap('<%= post.image || post.video %>', '<%= post.image ? "image" : "video" %>', this)">
+<% if(post.image){ %>
+<img src="/images/uploads/<%= post.image %>">
+<% } else { %>
+<video><source src="/images/uploads/<%= post.video %>"></video>
+<span class="play-icon">▶</span>
+<% } %>
+</div>
+
+<div class="snap-info">
+<div class="snap-title"><%= post.imageText %></div>
+<div class="placeholder-line">A moment time couldn’t erase…</div>
+
+<input class="comment-box" placeholder="Write memory..." onkeydown="saveMemory(event,'<%= post._id %>',this)">
+
+<div class="snap-actions">
+<button class="btn-delete" onclick="deletePost('<%= post._id %>')">Delete</button>
+<button class="btn-edit" onclick="editPost('<%= post._id %>')">Edit</button>
+</div>
+</div>
+
+</div>
+<% }) %>
+</div>
+</div>
+
+<div id="lightbox" class="lightbox">
+<div class="lightbox-panel">
+<div class="light-left">
+<h5 id="leftCaption">—</h5>
+<p id="memoryText">No memory saved yet…</p>
+</div>
+<div class="light-right">
+<div class="controls">
+<button onclick="zoom(0.2)">+</button>
+<button onclick="zoom(-0.2)">-</button>
+<button onclick="resetZoom()">Reset</button>
+<button onclick="closeSnap()">✕</button>
+</div>
+<div id="viewer"></div>
+</div>
+</div>
+</div>
+
+<script>
+let scale=1,media;
+
+function openSnap(src,type,card){
+var parent = card.closest('.snap-card');
+document.getElementById('lightbox').classList.add('open');
+document.getElementById('memoryText').textContent = parent.dataset.memory || "";
+document.getElementById('leftCaption').textContent = parent.querySelector('.snap-title').innerText;
+
+var v=document.getElementById('viewer'); v.innerHTML='';
+
+if(type==='video'){
+var vid=document.createElement('video');
+vid.src='/images/uploads/'+src;
+vid.controls=true; vid.autoplay=true;
+media=vid;
+}else{
+var img=document.createElement('img');
+img.src='/images/uploads/'+src;
+media=img;
+}
+media.className='viewer-media';
+v.appendChild(media);
+resetZoom();
+}
+
+function closeSnap(){
+document.getElementById('lightbox').classList.remove('open');
+if(media && media.tagName==="VIDEO"){media.pause(); media.currentTime=0;}
+}
+
+function zoom(val){scale+=val; media.style.transform="scale("+scale+")";}
+function resetZoom(){scale=1; media.style.transform="scale(1)";}
+
+function saveMemory(e,id,el){
+if(e.key==="Enter"){
+e.preventDefault();
+fetch('/memory/'+id,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({memory:el.value})
+}).then(function(){
+el.closest('.snap-card').dataset.memory=el.value;
+el.value='';
+});
+}
+}
+
+function deletePost(id){
+fetch('/delete/'+id,{method:'POST'})
+.then(function(res){return res.json();})
+.then(function(d){ if(d.success) location.reload(); });
+}
+
+function editPost(id){
+var card = document.querySelector('[data-id="'+id+'"]');
+var oldCaption = card.querySelector('.snap-title').innerText;
+var oldMemory = card.dataset.memory || "";
+
+var caption = prompt("Edit Caption:", oldCaption);
+if(caption === null) return;
+
+setTimeout(function(){
+var memory = prompt("Edit Paragraph / Memory:", oldMemory);
+if(memory === null) return;
+
+fetch('/edit/'+id,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({caption:caption,memory:memory})
+})
+.then(function(res){return res.json();})
+.then(function(d){ if(d.success) location.reload(); });
+
+},100);
+}
+
+document.getElementById('searchInput').addEventListener('input',function(){
+var val=this.value.toLowerCase();
+document.querySelectorAll('.snap-card').forEach(function(card){
+card.style.display = card.dataset.caption.includes(val) ? 'block' : 'none';
+});
+});
+
+function editProfile(){
+var bio=prompt('Edit your bio:');
+if(!bio) return;
+fetch('/update-bio',{
+method:'POST',
+headers:{'Content-Type':'application/x-www-form-urlencoded'},
+body:'bio='+encodeURIComponent(bio)
+}).then(function(){location.reload();});
+}
+</script>
+
+</body>
 </html>
+
+
+
+
+
+
+
+
+
+

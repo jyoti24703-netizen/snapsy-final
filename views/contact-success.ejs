@@ -1,56 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Message Sent</title>
-  <link rel="stylesheet" href="/stylesheets/feed.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thanks — <%= name %>!</title>
+
+  <!-- reuse contact stylesheet for cohesive look -->
+  <link href="/stylesheets/contact.css" rel="stylesheet" />
+
   <style>
-    /* Force all text and links to red and background white */
-    html, body {
-      background: #fff !important;  /* white background */
-      color: #f30d19 !important;    /* all text in red */
-      margin: 0;
-      padding: 50px;
-      font-family: Arial, sans-serif;
-      text-align: center;
+    /* Small page-specific additions */
+    .thanks-hero {
+      padding:28px;
+      border-radius:12px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 12px 36px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      display:flex;
+      gap:20px;
+      align-items:center;
+      margin-bottom:20px;
     }
 
-    /* Headline */
-    h1 {
-      color: #f30d19 !important;    /* red */
-      font-size: 2.5em;
+    .thanks-avatar {
+      width:88px; height:88px; border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; font-size:30px; color:#102027;
+      background: linear-gradient(135deg,#ff7a95,#ffd166);
+      box-shadow:0 12px 28px rgba(0,0,0,0.55);
+      position:relative;
     }
 
-    /* Paragraph */
-    p {
-      color: #f30d19 !important;    /* red */
-      font-size: 1.2em;
+    .thanks-text h1{ margin:0 0 8px 0; font-size:28px; line-height:1.05; }
+    .thanks-text p { margin:0; color:rgba(255,255,255,0.84); }
+
+    /* confetti pieces */
+    .confetti {
+      position:absolute;
+      left:0; right:0; top:4px;
+      pointer-events:none;
+      height:140px; overflow:visible;
+    }
+    .confetti i{
+      position:absolute;
+      width:10px; height:14px;
+      transform-origin:center;
+      opacity:0.95;
+      border-radius:2px;
+      animation: drop 1800ms linear infinite;
+    }
+    /* a few colors and delays */
+    .c1{ background:#ffd166; left:12%; animation-delay:0ms; }
+    .c2{ background:#ff7a95; left:28%; animation-delay:120ms;}
+    .c3{ background:#7ae7ff; left:44%; animation-delay:260ms;}
+    .c4{ background:#c2e9fb; left:60%; animation-delay:360ms;}
+    .c5{ background:#9bffd1; left:76%; animation-delay:480ms; }
+    @keyframes drop{
+      0%{ transform: translateY(-20px) rotate(0deg); opacity:1; }
+      70%{ opacity:1; }
+      100%{ transform: translateY(80px) rotate(360deg); opacity:0; }
     }
 
-    /* Links */
-    a {
-      color: #f30d19 !important;    /* red */
-      text-decoration: none;
-      font-weight: bold;
-    }
+    /* CTA grid after success */
+    .next-actions{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
+    .action-btn{ padding:10px 16px; border-radius:10px; font-weight:700; text-decoration:none; }
+    .action-primary{ background:linear-gradient(90deg,#ffd166,#ff7a95); color:#07121a; box-shadow:0 10px 26px rgba(255,122,149,0.08); }
+    .action-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:rgba(255,255,255,0.9); }
 
-    a:hover {
-      text-decoration: underline;
-    }
+    /* mini inline unsubscribe/subscribe demo */
+    .mini-sub { display:flex; gap:8px; margin-top:12px; align-items:center; }
+    .mini-sub input{ padding:8px 10px; border-radius:8px; border:none; background:rgba(255,255,255,0.02); color:#fff; }
 
-    /* Remove any background or borders from elements that might be black */
-    * {
-      background: transparent !important;
-      border-color: transparent !important;
+    /* responsive tweaks */
+    @media (max-width:720px){
+      .thanks-hero{ flex-direction:column; align-items:flex-start; }
+      .thanks-avatar{ width:72px; height:72px; font-size:22px; }
     }
   </style>
 </head>
 <body>
-  <h1>Thank You, <%= name %>! 🎉</h1>
-  <p>Your message has been received. We will get back to you soon.</p>
-  <a href="/">Back to Home</a>
+  <main class="contact-page" style="max-width:900px; margin:28px auto;">
+
+    <div class="thanks-hero">
+      <div style="position:relative;">
+        <div class="thanks-avatar">J</div>
+
+        <!-- confetti container, absolutely positioned -->
+        <div class="confetti" aria-hidden="true">
+          <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><i class="c5"></i>
+        </div>
+      </div>
+
+      <div class="thanks-text">
+        <h1>Thanks, <%= name %> 🎉</h1>
+        <p>We received your message — I’ll read it and get back within 24–48 hours. Meanwhile, here are some things you can do next:</p>
+
+        <div class="next-actions">
+          <a class="action-btn action-primary" href="/projects">Explore Projects</a>
+          <a class="action-btn action-ghost" href="/profile">View Profile</a>
+          <a class="action-btn action-ghost" href="/">Back to Home</a>
+        </div>
+
+        <div style="margin-top:10px;">
+          <small class="muted">Prefer social? Follow me:</small>
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <a class="socials" href="https://github.com/your-username" target="_blank" rel="noopener" style="padding:8px 10px; border-radius:8px; background:linear-gradient(90deg,#7ae7ff,#ffd166); color:#07121a; font-weight:700; text-decoration:none;">GitHub</a>
+            <a class="socials" href="https://linkedin.com/in/your-username" target="_blank" rel="noopener" style="padding:8px 10px; border-radius:8px; background:linear-gradient(90deg,#ff7a95,#ffd166); color:#07121a; font-weight:700; text-decoration:none;">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- engaging second block: quick survey and mini-newsletter -->
+    <div class="form-card" style="padding:18px; border-radius:12px;">
+      <h2 style="margin-top:0">Quick favor — 2 questions (1 click)</h2>
+      <p class="muted">Your answers help me prioritize features and respond faster.</p>
+
+      <form id="quickSurvey" onsubmit="return false;" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="radio" name="reason" value="project" checked> Interested in a project
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="radio" name="reason" value="mentor"> Mentoring / advice
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="radio" name="reason" value="other"> Something else
+        </label>
+
+        <button id="surveyBtn" class="btn primary" style="margin-left:8px">Send</button>
+
+        <div style="flex-basis:100%; height:1px;"></div>
+
+        <div style="width:320px;" class="mini-sub">
+          <input id="miniEmail" placeholder="Stay updated (your email)" type="email" />
+          <button id="miniSubBtn" class="btn small action-primary">Subscribe</button>
+        </div>
+
+        <p id="quickMsg" class="muted" style="width:100%; margin-top:12px;"></p>
+      </form>
+    </div>
+
+    <footer class="contact-footer" style="margin-top:18px;">
+      <p>Made with ❤️ by Jyoti • I’ll reply as soon as I can — in case of urgent matters, mention <strong>“urgent”</strong> in your message.</p>
+    </footer>
+  </main>
+
+  <script>
+    // tiny UI interactions — no server calls (demo UX)
+    document.getElementById('surveyBtn').addEventListener('click', () => {
+      const reason = document.querySelector('input[name="reason"]:checked').value;
+      const quickMsg = document.getElementById('quickMsg');
+      quickMsg.textContent = 'Thanks — noted "' + reason + '". I will prioritize messages like this.';
+      quickMsg.style.color = '#ffd166';
+      setTimeout(() => quickMsg.textContent = '', 6000);
+    });
+
+    document.getElementById('miniSubBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const eaddr = document.getElementById('miniEmail').value || '';
+      const quickMsg = document.getElementById('quickMsg');
+      if (!eaddr.includes('@')) {
+        quickMsg.textContent = 'Please enter a valid email to subscribe.';
+        quickMsg.style.color = '#ff7a95';
+        return;
+      }
+      quickMsg.textContent = 'Subscribed ' + eaddr + ' (demo). Thank you!';
+      quickMsg.style.color = '#ffd166';
+      document.getElementById('miniEmail').value = '';
+      setTimeout(() => quickMsg.textContent = '', 6000);
+    });
+  </script>
 </body>
 </html>
-
-
-
