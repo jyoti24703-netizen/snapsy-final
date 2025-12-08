@@ -1,4 +1,4 @@
-require("dotenv").config(); // ✅ REQUIRED FOR EMAIL (DO NOT REMOVE)
+require("dotenv").config();
 
 var createError = require('http-errors');
 var express = require('express');
@@ -9,13 +9,12 @@ const expressSession = require("express-session");
 const flash = require("connect-flash");
 
 var indexRouter = require('./routes/index');
-const userModel = require('./routes/users'); // ✅ mongoose user model
 const passport = require('passport');
 
 var app = express();
 
 // =======================
-// ✅ VIEW ENGINE SETUP
+// ✅ VIEW ENGINE
 // =======================
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -31,13 +30,10 @@ app.use(expressSession({
 }));
 
 // =======================
-// ✅ PASSPORT SETUP
+// ✅ PASSPORT
 // =======================
 app.use(passport.initialize());
 app.use(passport.session());
-
-passport.serializeUser(userModel.serializeUser());
-passport.deserializeUser(userModel.deserializeUser());
 
 // =======================
 // ✅ MIDDLEWARES
@@ -66,15 +62,8 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
   res.status(err.status || 500);
   res.render('error');
 });
 
-// =======================
-// ✅ ✅ ✅ THIS WAS MISSING (CRITICAL FIX)
-// =======================
 module.exports = app;
-
-
-

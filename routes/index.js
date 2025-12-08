@@ -15,7 +15,13 @@ const Contact = require("./contact");
 const passport = require('passport');
 const upload = require("./multer");
 const localStrategy = require("passport-local");
+
+// ======================
+// 🔐 PASSPORT CONFIG
+// ======================
 passport.use(new localStrategy(userModel.authenticate()));
+passport.serializeUser(userModel.serializeUser());
+passport.deserializeUser(userModel.deserializeUser());
 
 // ------------------ HOME ------------------
 router.get('/', function(req, res) {
@@ -212,17 +218,13 @@ router.get("/projects", async (req, res) => {
 router.get("/about", (req, res) => res.render("about"));
 router.get("/contact", (req, res) => res.render("contact"));
 
-// ====================================================
-// ✅ ✅ ✅ CONTACT FORM → SAVE + EMAIL + REDIRECT (FINAL)
-// ====================================================
+// ------------------ CONTACT FORM ------------------
 router.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    // ✅ Save to MongoDB
     await Contact.create({ name, email, message });
 
-    // ✅ Gmail Transporter (FIXED TO 587)
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -257,6 +259,7 @@ router.post("/contact", async (req, res) => {
   }
 });
 
+
 // ------------------ AUTH MIDDLEWARE ------------------
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
@@ -264,3 +267,4 @@ function isLoggedIn(req, res, next) {
 }
 
 module.exports = router;
+
