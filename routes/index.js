@@ -1,108 +1,42 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 
-require("dotenv").config();  
+require("dotenv").config();
 const nodemailer = require("nodemailer");
 
-const fs = require("fs");
-const path = require("path");
+const userModel = require("../models/users");
+const postModel = require("../models/posts");
+const commentModel = require("../models/comments");
+const Contact = require("../models/contact");
 
-const userModel = require("./users");
-const postModel = require("./posts");
-const commentModel = require("./comments");
-const Contact = require("./contact");
+const passport = require("passport");
+const upload = require("./multer"); // correct path
 
-const passport = require('passport');
-const upload = require("./multer");
-const localStrategy = require("passport-local");
-
-// ======================
-// 🔐 PASSPORT CONFIG
-// ======================
-passport.use(new localStrategy(userModel.authenticate()));
-passport.serializeUser(userModel.serializeUser());
-passport.deserializeUser(userModel.deserializeUser());
-
-// ------------------ HOME ------------------
-router.get('/', function(req, res) {
-  res.render('index');
+// ----------------------
+// HOME PAGE
+// ----------------------
+router.get("/", (req, res) => {
+  res.render("index", { user: req.user || null });
 });
 
-// ------------------ LOGIN ------------------
-router.get('/login', function (req, res) {
-  res.render('login', { error: req.flash('error') });
+// ----------------------
+// LOGIN PAGE
+// ----------------------
+router.get("/login", (req, res) => {
+  res.render("login", { error: req.flash("error") });
 });
 
-// ------------------ FEED ------------------
-router.get('/feed', async (req, res) => {
-  try {
-    const posts = await postModel.find({})
-      .populate('user', 'username fullname dp')
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.render('feed', { posts, user: req.user });
-  } catch (err) {
-    console.error("Feed error:", err);
-    res.status(500).send("Error loading feed");
-  }
-});
-
-// ------------------ UPLOAD ------------------
-router.post('/upload', isLoggedIn, upload.single("file"), async function(req, res) {
-  try {
-    if (!req.file) return res.status(400).send("No file uploaded");
-
-    const user = await userModel.findOne({ username: req.session.passport.user });
-    if (!user) return res.status(404).send("User not found");
-
-    let postData = {
-      imageText: req.body.filecaption || "",
-      imageName: req.body.imagename || "",
-      user: user._id,
-      memory: ""
-    };
-
-    if (req.file.mimetype.startsWith("image")) postData.image = req.file.filename;
-    else if (req.file.mimetype.startsWith("video")) postData.video = req.file.filename;
-
-    const post = await postModel.create(postData);
-    user.posts.push(post._id);
-    await user.save();
-
-    res.redirect("/profile");
-  } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).send("Error uploading file");
-  }
-});
-
-// ------------------ PROFILE ------------------
-router.get('/profile', isLoggedIn, async function(req, res) {
-  try {
-    const user = await userModel
-      .findOne({ username: req.session.passport.user })
-      .populate({
-        path: "posts",
-        options: { sort: { createdAt: -1 } }
-      });
-
-    if (!user) return res.redirect('/login');
-    res.render("profile", { user });
-  } catch (err) {
-    console.error("Profile error:", err);
-    res.status(500).send("Error loading profile");
-  }
-});
-
-// ------------------ REGISTER ------------------
-router.post("/register", async function(req, res) {
+// ----------------------
+// REGISTER USER
+// ----------------------
+router.post("/register", async (req, res) => {
   try {
     const { username, email, fullname } = req.body;
     const userData = new userModel({ username, email, fullname });
 
     await userModel.register(userData, req.body.password);
-    passport.authenticate("local")(req, res, function() {
+
+    passport.authenticate("local")(req, res, () => {
       res.redirect("/profile");
     });
   } catch (err) {
@@ -111,160 +45,119 @@ router.post("/register", async function(req, res) {
   }
 });
 
-// ------------------ LOGIN POST ------------------
-router.post("/login", passport.authenticate("local", {
-  successRedirect: "/profile",
-  failureRedirect: "/login",
-  failureFlash: true
-}));
+// ----------------------
+// LOGIN USER
+// ----------------------
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  (req, res) => {
+    res.redirect("/profile");
+  }
+);
 
-// ------------------ LOGOUT ------------------
-router.get("/logout", function(req, res, next) {
-  req.logout(function(err) {
-    if (err) return next(err);
-    res.redirect('/');
+// ----------------------
+// LOGOUT USER
+// ----------------------
+router.get("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) console.log(err);
+    res.redirect("/login");
   });
 });
 
-// ------------------ DELETE ------------------
-router.post("/delete/:id", isLoggedIn, async function(req, res) {
+// ----------------------
+// PROFILE PAGE
+// ----------------------
+router.get("/profile", isLoggedIn, async (req, res) => {
   try {
-    const postId = req.params.id;
+    const user = await userModel
+      .findById(req.user._id)
+      .populate({ path: "posts", options: { sort: { createdAt: -1 } } });
 
-    const post = await postModel.findByIdAndDelete(postId);
-
-    if (post) {
-      const oldMedia = post.image || post.video;
-      if (oldMedia) {
-        const oldPath = path.join(__dirname, "../public/images/uploads", oldMedia);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
-    }
-
-    await userModel.updateOne(
-      { username: req.session.passport.user },
-      { $pull: { posts: postId } }
-    );
-
-    res.json({ success: true });
+    res.render("profile", { user });
   } catch (err) {
-    console.error("Delete error:", err);
-    res.status(500).json({ success: false });
+    res.status(500).send("Error loading profile");
   }
 });
 
-// ------------------ SAVE MEMORY ------------------
-router.post('/memory/:id', isLoggedIn, async function(req, res) {
-  try {
-    const postId = req.params.id;
-    const { memory } = req.body;
+// ----------------------
+// FEED
+// ----------------------
+router.get("/feed", isLoggedIn, async (req, res) => {
+  const posts = await postModel
+    .find({})
+    .populate("user", "username fullname dp")
+    .sort({ createdAt: -1 });
 
-    await postModel.findByIdAndUpdate(postId, { memory });
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Memory save error:", err);
-    res.status(500).json({ success: false });
-  }
+  res.render("feed", { posts, user: req.user });
 });
 
-// ------------------ EDIT ------------------
-router.post("/edit/:id", isLoggedIn, async function(req, res) {
+// ----------------------
+// UPLOAD POST
+// ----------------------
+router.post("/upload", isLoggedIn, upload.single("file"), async (req, res) => {
   try {
-    const { caption, memory } = req.body;
-
-    await postModel.findByIdAndUpdate(req.params.id, {
-      imageText: caption,
-      memory: memory
+    const post = await postModel.create({
+      user: req.user._id,
+      image: req.file?.filename || null,
+      imageText: req.body.filecaption || "",
     });
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Edit error:", err);
-    res.status(500).json({ success: false });
-  }
-});
+    req.user.posts.push(post._id);
+    await req.user.save();
 
-// ------------------ UPDATE DP ------------------
-router.post("/update-dp", isLoggedIn, upload.single("dp"), async (req, res) => {
-  try {
-    const user = await userModel.findOne({ username: req.session.passport.user });
-    if (req.file) user.dp = req.file.filename;
-    await user.save();
     res.redirect("/profile");
   } catch (err) {
-    res.status(500).send("Error updating profile picture");
+    res.status(500).send("Upload failed");
   }
 });
 
-// ------------------ UPDATE BIO ------------------
-router.post("/update-bio", isLoggedIn, async (req, res) => {
-  try {
-    const user = await userModel.findOne({ username: req.session.passport.user });
-    user.bio = req.body.bio || "";
-    await user.save();
-    res.redirect("/profile");
-  } catch (err) {
-    res.status(500).send("Error updating bio");
-  }
-});
-
-// ------------------ PROJECTS ------------------
-router.get("/projects", async (req, res) => {
-  const latest = await postModel.findOne({}).sort({ createdAt: -1 }).lean();
-  res.render("projects", { project: latest || {} });
-});
-
-// ------------------ ABOUT & CONTACT ------------------
-router.get("/about", (req, res) => res.render("about"));
-router.get("/contact", (req, res) => res.render("contact"));
-
-// ------------------ CONTACT FORM ------------------
+// ----------------------
+// CONTACT FORM (POST)
+// ----------------------
 router.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
-
     await Contact.create({ name, email, message });
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    const mailOptions = {
-      from: `"Contact Form" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      replyTo: email,
-      subject: `📩 New Contact Message from ${name}`,
-      html: `
-        <h3>New Contact Form Message</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-
     res.render("contact-success", { name });
-
   } catch (err) {
-    console.error("Contact error:", err);
     res.status(500).send("Error submitting contact form");
   }
 });
 
+// ----------------------
+// STATIC PAGES
+// ----------------------
+router.get("/about", (req, res) => {
+  res.render("about", { user: req.user || null });
+});
 
-// ------------------ AUTH MIDDLEWARE ------------------
+router.get("/projects", (req, res) => {
+  res.render("projects", { user: req.user || null });
+});
+
+router.get("/contact", (req, res) => {
+  res.render("contact", { user: req.user || null });
+});
+
+// ----------------------
+// AUTH MIDDLEWARE
+// ----------------------
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/login");
 }
 
 module.exports = router;
+
+
+
+
+
+
 

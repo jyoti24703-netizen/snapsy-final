@@ -1,88 +1,102 @@
 require("dotenv").config();
 
 const mongoose = require("mongoose");
-mongoose.connect(process.env.MONGODB_URI)
-.then(() => console.log("MongoDB Connected ✔️"))
-.catch(err => console.log("MongoDB Error ❌", err));
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB Connected ✔️"))
+  .catch((err) => console.log("MongoDB Error ❌", err));
 
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+var createError = require("http-errors");
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+var logger = require("morgan");
 
-const expressSession = require("express-session");
-const MongoStore = require("connect-mongo"); // ✔ correct version syntax
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
+const passport = require("passport");
+const User = require("./models/users");
 
-var indexRouter = require('./routes/index');
-const passport = require('passport');
+var indexRouter = require("./routes/index");
 
 var app = express();
 
-// =======================
-// VIEW ENGINE
-// =======================
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// ----------------------
+// View Engine
+// ----------------------
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-// =======================
-// SESSION WITH MONGODB STORE (FINAL FIX)
-// =======================
-app.use(flash());
-app.use(expressSession({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    dbName: "snapsy",
-    collectionName: "sessions"
-  }),
-  cookie: {
-    secure: process.env.NODE_ENV === "production", // true on Render
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
-  }
-}));
+// ----------------------
+// TRUST PROXY FOR RENDER
+// ----------------------
+app.set("trust proxy", 1);
 
-// =======================
-// PASSPORT
-// =======================
+// ----------------------
+// SESSION CONFIG
+// ----------------------
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "secret123",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: "sessions",
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    },
+  })
+);
+
+// ----------------------
+// PASSPORT SETUP
+// ----------------------
 app.use(passport.initialize());
 app.use(passport.session());
 
-// =======================
-// MIDDLEWARES
-// =======================
-app.use(logger('dev'));
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use(flash());
+
+// ----------------------
+// Middleware
+// ----------------------
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-// =======================
-// ROUTES
-// =======================
-app.use('/', indexRouter);
+// ----------------------
+// Routes
+// ----------------------
+app.use("/", indexRouter);
 
-// =======================
-// 404 HANDLER
-// =======================
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+// ----------------------
+// 404
+// ----------------------
+app.use((req, res, next) => next(createError(404)));
 
-// =======================
-// ERROR HANDLER
-// =======================
-app.use(function(err, req, res, next) {
+// ----------------------
+// Error Handler
+// ----------------------
+app.use((err, req, res, next) => {
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get("env") === "development" ? err : {};
   res.status(err.status || 500);
-  res.render('error');
+  res.render("error");
 });
 
 module.exports = app;
+
+
+
 
