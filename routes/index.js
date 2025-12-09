@@ -10,7 +10,7 @@ const commentModel = require("../models/comments");
 const Contact = require("../models/contact");
 
 const passport = require("passport");
-const upload = require("./multer"); // correct path
+const upload = require("../routes/multer"); // fixed path
 
 // ----------------------
 // HOME PAGE
@@ -85,7 +85,7 @@ router.get("/profile", isLoggedIn, async (req, res) => {
 });
 
 // ----------------------
-// FEED
+// FEED PAGE
 // ----------------------
 router.get("/feed", isLoggedIn, async (req, res) => {
   const posts = await postModel
@@ -101,9 +101,13 @@ router.get("/feed", isLoggedIn, async (req, res) => {
 // ----------------------
 router.post("/upload", isLoggedIn, upload.single("file"), async (req, res) => {
   try {
+    const isImage = req.file?.mimetype.startsWith("image");
+    const isVideo = req.file?.mimetype.startsWith("video");
+
     const post = await postModel.create({
       user: req.user._id,
-      image: req.file?.filename || null,
+      image: isImage ? req.file.filename : null,
+      video: isVideo ? req.file.filename : null,
       imageText: req.body.filecaption || "",
     });
 
@@ -117,7 +121,56 @@ router.post("/upload", isLoggedIn, upload.single("file"), async (req, res) => {
 });
 
 // ----------------------
-// CONTACT FORM (POST)
+// SAVE MEMORY (ENTER KEY)
+// ----------------------
+router.post("/memory/:id", isLoggedIn, async (req, res) => {
+  await postModel.findByIdAndUpdate(req.params.id, { memory: req.body.memory });
+  res.json({ success: true });
+});
+
+// ----------------------
+// EDIT POST (caption + memory)
+// ----------------------
+router.post("/edit/:id", isLoggedIn, async (req, res) => {
+  await postModel.findByIdAndUpdate(req.params.id, {
+    imageText: req.body.caption,
+    memory: req.body.memory,
+  });
+
+  res.json({ success: true });
+});
+
+// ----------------------
+// DELETE POST
+// ----------------------
+router.post("/delete/:id", isLoggedIn, async (req, res) => {
+  await postModel.findByIdAndDelete(req.params.id);
+
+  await userModel.findByIdAndUpdate(req.user._id, {
+    $pull: { posts: req.params.id },
+  });
+
+  res.json({ success: true });
+});
+
+// ----------------------
+// UPDATE BIO
+// ----------------------
+router.post("/update-bio", isLoggedIn, async (req, res) => {
+  await userModel.findByIdAndUpdate(req.user._id, { bio: req.body.bio });
+  res.redirect("/profile");
+});
+
+// ----------------------
+// UPDATE PROFILE PICTURE
+// ----------------------
+router.post("/update-dp", isLoggedIn, upload.single("dp"), async (req, res) => {
+  await userModel.findByIdAndUpdate(req.user._id, { dp: req.file.filename });
+  res.redirect("/profile");
+});
+
+// ----------------------
+// CONTACT FORM
 // ----------------------
 router.post("/contact", async (req, res) => {
   try {
@@ -133,17 +186,9 @@ router.post("/contact", async (req, res) => {
 // ----------------------
 // STATIC PAGES
 // ----------------------
-router.get("/about", (req, res) => {
-  res.render("about", { user: req.user || null });
-});
-
-router.get("/projects", (req, res) => {
-  res.render("projects", { user: req.user || null });
-});
-
-router.get("/contact", (req, res) => {
-  res.render("contact", { user: req.user || null });
-});
+router.get("/about", (req, res) => res.render("about", { user: req.user || null }));
+router.get("/projects", (req, res) => res.render("projects", { user: req.user || null }));
+router.get("/contact", (req, res) => res.render("contact", { user: req.user || null }));
 
 // ----------------------
 // AUTH MIDDLEWARE
@@ -154,6 +199,7 @@ function isLoggedIn(req, res, next) {
 }
 
 module.exports = router;
+
 
 
 
