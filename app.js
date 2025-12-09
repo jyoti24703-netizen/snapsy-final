@@ -29,9 +29,14 @@ app.set('view engine', 'ejs');
 // =======================
 app.use(flash());
 app.use(expressSession({
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  secret: "hey hey hey"
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax"
+  }
 }));
 
 // =======================
@@ -72,4 +77,5 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
 
