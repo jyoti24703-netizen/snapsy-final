@@ -1,5 +1,10 @@
 require("dotenv").config();
 
+const mongoose = require("mongoose");
+mongoose.connect(process.env.MONGODB_URI)
+.then(() => console.log("MongoDB Connected ✔️"))
+.catch(err => console.log("MongoDB Error ❌", err));
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -50,14 +55,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 
 // =======================
-// ✅ 404 HANDLER
+// ❌ 404 HANDLER
 // =======================
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
 // =======================
-// ✅ ERROR HANDLER
+// ❌ ERROR HANDLER
 // =======================
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
@@ -67,3 +72,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
