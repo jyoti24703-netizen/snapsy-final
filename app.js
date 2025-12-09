@@ -10,7 +10,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+
 const expressSession = require("express-session");
+const MongoStore = require("connect-mongo"); // ✔ correct version syntax
 const flash = require("connect-flash");
 
 var indexRouter = require('./routes/index');
@@ -19,34 +21,40 @@ const passport = require('passport');
 var app = express();
 
 // =======================
-// ✅ VIEW ENGINE
+// VIEW ENGINE
 // =======================
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // =======================
-// ✅ SESSION + FLASH
+// SESSION WITH MONGODB STORE (FINAL FIX)
 // =======================
 app.use(flash());
 app.use(expressSession({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    dbName: "snapsy",
+    collectionName: "sessions"
+  }),
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production", // true on Render
     httpOnly: true,
-    sameSite: "lax"
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
   }
 }));
 
 // =======================
-// ✅ PASSPORT
+// PASSPORT
 // =======================
 app.use(passport.initialize());
 app.use(passport.session());
 
 // =======================
-// ✅ MIDDLEWARES
+// MIDDLEWARES
 // =======================
 app.use(logger('dev'));
 app.use(express.json());
@@ -55,19 +63,19 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // =======================
-// ✅ ROUTES
+// ROUTES
 // =======================
 app.use('/', indexRouter);
 
 // =======================
-// ❌ 404 HANDLER
+// 404 HANDLER
 // =======================
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
 // =======================
-// ❌ ERROR HANDLER
+// ERROR HANDLER
 // =======================
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
@@ -77,5 +85,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-
 
